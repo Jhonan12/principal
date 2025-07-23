@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ruleta Europea</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    #pantallaInicio, #contenidoPrincipal {
+      display: none;
+      text-align: center;
+      margin-top: 50px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    input[type="password"] {
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #222;
+      color: white;
+      width: 250px;
+    }
+    #mensajeClave {
+      color: red;
+      height: 20px;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="pantallaInicio" role="dialog" aria-modal="true" aria-labelledby="tituloInicio">
+    <h2 id="tituloInicio">Bienvenido a la Ruleta Europea 🎯</h2>
+    <input
+      type="password"
+      id="claveInput"
+      placeholder="Ingresa tu clave de acceso"
+      aria-label="Campo para ingresar clave"
+    />
+    <div id="mensajeClave" aria-live="polite"></div>
+    <button id="btnIngresar" aria-label="Ingresar a la aplicación">Ingresar</button>
+  </div>
+
+  <div id="contenidoPrincipal" tabindex="-1">
+    <h1>Ruleta Europea</h1>
+    <p>Aquí irá el contenido del sistema principal (análisis, estadísticas, etc.)</p>
+  </div>
+
+  <script>
+    // Función para obtener cuentas desde localStorage
+    function cargarCuentas() {
+      return JSON.parse(localStorage.getItem('cuentasAcceso')) || [];
+    }
+
+    // Función para validar si la cuenta está activa según fecha expiración
+    function estaCuentaActiva(cuenta) {
+      const fechaCreacion = new Date(cuenta.fechaCreacion);
+      const fechaExpiracion = new Date(fechaCreacion);
+      fechaExpiracion.setDate(fechaExpiracion.getDate() + cuenta.duracionDias);
+      const ahora = new Date();
+      return ahora <= fechaExpiracion;
+    }
+
+    // Mostrar la pantalla de inicio al cargar
+    document.getElementById('pantallaInicio').style.display = 'block';
+
+    document.getElementById('btnIngresar').addEventListener('click', () => {
+      const claveIngresada = document.getElementById('claveInput').value.trim();
+      const mensaje = document.getElementById('mensajeClave');
+      const cuentas = cargarCuentas();
+
+      // Buscar si hay alguna cuenta con clave igual y que esté activa
+      const cuentaValida = cuentas.find(cuenta => cuenta.clave === claveIngresada && estaCuentaActiva(cuenta));
+
+      if (cuentaValida) {
+        // Acceso permitido
+        document.getElementById('pantallaInicio').style.display = 'none';
+        const contenido = document.getElementById('contenidoPrincipal');
+        contenido.style.display = 'block';
+        contenido.focus();
+        mensaje.textContent = '';
+      } else {
+        // Acceso denegado
+        mensaje.textContent = '⚠️ Clave incorrecta o cuenta expirada. Intenta de nuevo.';
+      }
+    });
+  </script>
+</body>
+</html>
